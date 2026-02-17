@@ -1,0 +1,788 @@
+/* =============================================
+   ポップ★オセロ - ギャルポップスタイル
+   ============================================= */
+
+/* ---------- CSS Variables ---------- */
+:root {
+    --pink-hot: #FF2D9B;
+    --pink-light: #FF85C8;
+    --pink-pastel: #FFB8E0;
+    --purple-neon: #B24BF3;
+    --purple-dark: #6B1FA8;
+    --yellow-hot: #FFE135;
+    --yellow-light: #FFF176;
+    --mint: #7DFFC2;
+    --mint-dark: #00E5A0;
+    --cyan: #00E5FF;
+    --bg-dark: #1A0A2E;
+    --bg-gradient: linear-gradient(135deg, #1A0A2E 0%, #2D1B69 30%, #16213E 60%, #1A0A2E 100%);
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --board-bg: linear-gradient(145deg, #1B5E20, #2E7D32, #1B5E20);
+    --cell-bg: #2E7D32;
+    --cell-hover: rgba(255, 45, 155, 0.3);
+    --cell-hint: rgba(255, 225, 53, 0.4);
+    --disc-black: linear-gradient(145deg, #1a1a2e, #16213e, #0f3460);
+    --disc-white: linear-gradient(145deg, #ffffff, #f0f0f0, #e0e0e0);
+    --font-main: 'Zen Maru Gothic', sans-serif;
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    font-family: var(--font-main);
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ---------- Sparkle Canvas ---------- */
+#sparkle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* ---------- App Container ---------- */
+.app-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* ---------- Glass Panel ---------- */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+}
+
+/* ---------- Header ---------- */
+.game-header {
+    text-align: center;
+    margin-bottom: 20px;
+    animation: fadeInDown 0.8s ease;
+}
+
+.title {
+    font-size: 2.8rem;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.title-text {
+    background: linear-gradient(135deg, var(--pink-hot), var(--yellow-hot), var(--mint), var(--purple-neon));
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 4s ease infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px rgba(255,45,155,0.5));
+}
+
+.title-star {
+    font-size: 2rem;
+    animation: twinkle 1.5s ease infinite alternate;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: var(--pink-light);
+    letter-spacing: 3px;
+    margin-top: 5px;
+    animation: pulse 2s ease infinite;
+}
+
+/* ---------- Mode Select ---------- */
+.mode-select {
+    width: 100%;
+    max-width: 500px;
+    animation: fadeInUp 0.6s ease;
+}
+
+.mode-card {
+    padding: 30px;
+    text-align: center;
+}
+
+.mode-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: var(--yellow-hot);
+    text-shadow: 0 0 15px rgba(255, 225, 53, 0.5);
+}
+
+.mode-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.mode-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 25px 20px;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-weight: 700;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.mode-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.mode-btn:hover::before {
+    opacity: 1;
+}
+
+.btn-vs-human {
+    background: linear-gradient(135deg, var(--pink-hot), var(--purple-neon));
+    color: #fff;
+    border-color: var(--pink-light);
+}
+
+.btn-vs-human:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(255, 45, 155, 0.5);
+}
+
+.btn-vs-cpu {
+    background: linear-gradient(135deg, var(--cyan), var(--mint-dark));
+    color: #1A0A2E;
+    border-color: var(--mint);
+}
+
+.btn-vs-cpu:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 229, 255, 0.5);
+}
+
+.mode-icon {
+    font-size: 2.5rem;
+}
+
+.mode-label {
+    font-size: 1.2rem;
+}
+
+.mode-desc {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+/* ---------- Difficulty Select ---------- */
+.difficulty-select {
+    margin-top: 25px;
+    animation: fadeInUp 0.4s ease;
+}
+
+.difficulty-title {
+    font-size: 1.1rem;
+    color: var(--mint);
+    margin-bottom: 15px;
+}
+
+.difficulty-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.diff-btn {
+    padding: 12px 24px;
+    border: 2px solid;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.diff-easy {
+    background: rgba(255, 183, 224, 0.2);
+    border-color: var(--pink-pastel);
+    color: var(--pink-pastel);
+}
+
+.diff-easy:hover {
+    background: var(--pink-pastel);
+    color: var(--bg-dark);
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba(255, 184, 224, 0.5);
+}
+
+.diff-normal {
+    background: rgba(255, 225, 53, 0.2);
+    border-color: var(--yellow-hot);
+    color: var(--yellow-hot);
+}
+
+.diff-normal:hover {
+    background: var(--yellow-hot);
+    color: var(--bg-dark);
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba(255, 225, 53, 0.5);
+}
+
+.diff-hard {
+    background: rgba(178, 75, 243, 0.2);
+    border-color: var(--purple-neon);
+    color: var(--purple-neon);
+}
+
+.diff-hard:hover {
+    background: var(--purple-neon);
+    color: #fff;
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba(178, 75, 243, 0.5);
+}
+
+/* ---------- Game Screen ---------- */
+.game-screen {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    animation: fadeInUp 0.5s ease;
+}
+
+/* ---------- Score Panel ---------- */
+.score-panel {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    gap: 10px;
+}
+
+.player-score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    position: relative;
+}
+
+.player-black {
+    justify-content: flex-start;
+}
+
+.player-white {
+    justify-content: flex-end;
+}
+
+.score-disc {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.disc-black-mini {
+    background: var(--disc-black);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+.disc-white-mini {
+    background: var(--disc-white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.score-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.player-name {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+.score-number {
+    font-size: 1.8rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.player-black .score-number {
+    color: var(--pink-hot);
+    text-shadow: 0 0 10px rgba(255, 45, 155, 0.5);
+}
+
+.player-white .score-number {
+    color: var(--cyan);
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+}
+
+.vs-label {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--yellow-hot);
+    text-shadow: 0 0 10px rgba(255, 225, 53, 0.5);
+    flex-shrink: 0;
+}
+
+.turn-indicator {
+    font-size: 0.7rem;
+    color: var(--yellow-hot);
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    white-space: nowrap;
+    animation: bounceSmall 0.6s ease infinite alternate;
+}
+
+.turn-indicator.active {
+    opacity: 1;
+}
+
+/* ---------- Message Area ---------- */
+.message-area {
+    text-align: center;
+    min-height: 30px;
+}
+
+.game-message {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--yellow-light);
+    animation: pulse 1.5s ease infinite;
+}
+
+/* ---------- Game Board ---------- */
+.board-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    padding: 8px;
+    background: var(--board-bg);
+    border: 3px solid var(--mint-dark);
+    box-shadow:
+        0 0 20px rgba(0, 229, 160, 0.3),
+        0 0 60px rgba(0, 229, 160, 0.1),
+        inset 0 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.cell {
+    width: 56px;
+    height: 56px;
+    background: var(--cell-bg);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: background var(--transition-fast);
+}
+
+.cell:hover {
+    background: #3E8E41;
+}
+
+.cell.hint {
+    background: rgba(46, 125, 50, 0.9);
+    position: relative;
+}
+
+.cell.hint::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--cell-hint);
+    animation: hintPulse 1.2s ease infinite;
+}
+
+.cell.hint:hover {
+    background: var(--cell-hover);
+}
+
+.cell.hint:hover::after {
+    display: none;
+}
+
+/* ---------- Discs ---------- */
+.disc {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    position: absolute;
+    transition: transform 0.5s ease;
+    transform-style: preserve-3d;
+}
+
+.disc.black {
+    background: var(--disc-black);
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        0 0 15px rgba(255, 45, 155, 0.3);
+}
+
+.disc.white {
+    background: var(--disc-white);
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+        0 0 15px rgba(0, 229, 255, 0.3);
+}
+
+/* ひっくり返しアニメーション */
+.disc.flipping {
+    animation: flipDisc 0.6s ease;
+}
+
+/* 新しく置いた石のアニメーション */
+.disc.placed {
+    animation: placeDisc 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------- Controls ---------- */
+.controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 5px;
+}
+
+.control-btn {
+    padding: 10px 24px;
+    border: 2px solid;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-restart {
+    background: linear-gradient(135deg, var(--pink-hot), var(--purple-neon));
+    border-color: var(--pink-light);
+    color: #fff;
+}
+
+.btn-restart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 45, 155, 0.5);
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+/* ---------- Result Modal ---------- */
+.result-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+}
+
+.result-content {
+    text-align: center;
+    padding: 40px;
+    max-width: 400px;
+    width: 90%;
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.result-emoji {
+    font-size: 4rem;
+    margin-bottom: 10px;
+    animation: bounceIn 0.6s ease;
+}
+
+.result-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--pink-hot), var(--yellow-hot));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+}
+
+.result-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--pink-light);
+}
+
+.result-score {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.result-score .score-black {
+    color: var(--pink-hot);
+    text-shadow: 0 0 15px rgba(255, 45, 155, 0.6);
+}
+
+.result-score .score-white {
+    color: var(--cyan);
+    text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+}
+
+.result-score .score-separator {
+    color: var(--yellow-hot);
+}
+
+.result-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ---------- Animations ---------- */
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes twinkle {
+    0% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+    100% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popIn {
+    0% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+@keyframes bounceSmall {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-3px); }
+}
+
+@keyframes flipDisc {
+    0% { transform: rotateY(0deg) scale(1); }
+    25% { transform: rotateY(90deg) scale(0.8); }
+    50% { transform: rotateY(180deg) scale(0.8); }
+    75% { transform: rotateY(270deg) scale(0.9); }
+    100% { transform: rotateY(360deg) scale(1); }
+}
+
+@keyframes placeDisc {
+    0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes hintPulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.8); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes sparkle {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    50% { opacity: 1; }
+    100% { transform: scale(1) rotate(180deg); opacity: 0; }
+}
+
+/* ---------- Utility ---------- */
+.hidden {
+    display: none !important;
+}
+
+/* ---------- Sparkle Effect ---------- */
+.sparkle-effect {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.sparkle-particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: sparkleParticle 0.8s ease forwards;
+}
+
+@keyframes sparkleParticle {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+    }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 520px) {
+    .title {
+        font-size: 2rem;
+    }
+
+    .cell {
+        width: 42px;
+        height: 42px;
+    }
+
+    .disc {
+        width: 34px;
+        height: 34px;
+    }
+
+    .board {
+        padding: 5px;
+        gap: 1px;
+    }
+
+    .mode-btn {
+        min-width: 140px;
+        padding: 18px 15px;
+    }
+
+    .score-panel {
+        padding: 10px 12px;
+    }
+
+    .score-number {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .cell {
+        width: 36px;
+        height: 36px;
+    }
+
+    .disc {
+        width: 28px;
+        height: 28px;
+    }
+
+    .title {
+        font-size: 1.6rem;
+    }
+}

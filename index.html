@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ ポップ★オセロ ✨</title>
+    <meta name="description" content="ギャルでも楽しめるポップでカワイイオセロゲーム！キラキラエフェクト満載♡">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- キラキラパーティクルの背景 -->
+    <canvas id="sparkle-canvas"></canvas>
+
+    <div class="app-container">
+        <!-- タイトル -->
+        <header class="game-header">
+            <h1 class="title">
+                <span class="title-star">✨</span>
+                <span class="title-text">ポップ★オセロ</span>
+                <span class="title-star">✨</span>
+            </h1>
+            <p class="subtitle">♡ めっちゃカワイイ対戦ゲーム ♡</p>
+        </header>
+
+        <!-- モード選択画面 -->
+        <div id="mode-select" class="mode-select">
+            <div class="mode-card glass-panel">
+                <h2 class="mode-title">💖 モードをえらんでね 💖</h2>
+                <div class="mode-buttons">
+                    <button class="mode-btn btn-vs-human" onclick="startGame('human')">
+                        <span class="mode-icon">👯‍♀️</span>
+                        <span class="mode-label">ふたりで対戦</span>
+                        <span class="mode-desc">友達と一緒に！</span>
+                    </button>
+                    <button class="mode-btn btn-vs-cpu" onclick="showDifficulty()">
+                        <span class="mode-icon">🤖</span>
+                        <span class="mode-label">CPUと対戦</span>
+                        <span class="mode-desc">ひとりでも楽しい！</span>
+                    </button>
+                </div>
+                <!-- 難易度選択 -->
+                <div id="difficulty-select" class="difficulty-select hidden">
+                    <h3 class="difficulty-title">⭐ むずかしさ ⭐</h3>
+                    <div class="difficulty-buttons">
+                        <button class="diff-btn diff-easy" onclick="startGame('easy')">
+                            <span>🌸</span> かんたん
+                        </button>
+                        <button class="diff-btn diff-normal" onclick="startGame('normal')">
+                            <span>🔥</span> ふつう
+                        </button>
+                        <button class="diff-btn diff-hard" onclick="startGame('hard')">
+                            <span>💀</span> むずかしい
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ゲーム画面 -->
+        <div id="game-screen" class="game-screen hidden">
+            <!-- スコアパネル -->
+            <div class="score-panel glass-panel">
+                <div class="player-score player-black" id="player-black">
+                    <div class="score-disc disc-black-mini"></div>
+                    <div class="score-info">
+                        <span class="player-name" id="black-name">プレイヤー1</span>
+                        <span class="score-number" id="black-score">2</span>
+                    </div>
+                    <div class="turn-indicator" id="black-turn">💖 NOW!</div>
+                </div>
+                <div class="vs-label">VS</div>
+                <div class="player-score player-white" id="player-white">
+                    <div class="turn-indicator" id="white-turn">💖 NOW!</div>
+                    <div class="score-info">
+                        <span class="player-name" id="white-name">プレイヤー2</span>
+                        <span class="score-number" id="white-score">2</span>
+                    </div>
+                    <div class="score-disc disc-white-mini"></div>
+                </div>
+            </div>
+
+            <!-- メッセージ -->
+            <div class="message-area">
+                <p class="game-message" id="game-message">⬛の番だよ！♡</p>
+            </div>
+
+            <!-- ゲームボード -->
+            <div class="board-wrapper">
+                <div class="board glass-panel" id="game-board">
+                    <!-- JSで8x8のセルを生成 -->
+                </div>
+            </div>
+
+            <!-- コントロールボタン -->
+            <div class="controls">
+                <button class="control-btn btn-restart" onclick="resetGame()">
+                    <span>🔄</span> もう1回！
+                </button>
+                <button class="control-btn btn-back" onclick="backToMenu()">
+                    <span>🏠</span> もどる
+                </button>
+            </div>
+        </div>
+
+        <!-- 勝敗結果モーダル -->
+        <div id="result-modal" class="result-modal hidden">
+            <div class="result-content glass-panel">
+                <div class="result-emoji" id="result-emoji">🎉</div>
+                <h2 class="result-title" id="result-title">けっか発表！</h2>
+                <p class="result-text" id="result-text"></p>
+                <div class="result-score" id="result-score"></div>
+                <div class="result-buttons">
+                    <button class="control-btn btn-restart" onclick="resetGame(); closeResult();">
+                        <span>🔄</span> もう1回！
+                    </button>
+                    <button class="control-btn btn-back" onclick="backToMenu(); closeResult();">
+                        <span>🏠</span> もどる
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- コンフェッティキャンバス -->
+        <canvas id="confetti-canvas"></canvas>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
