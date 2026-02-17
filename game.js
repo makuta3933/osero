@@ -16,14 +16,14 @@ const DIRECTIONS = [
 
 // 評価用の重み (ふつう以上のCPU用)
 const WEIGHT_MAP = [
-    [120, -20,  20,   5,   5,  20, -20, 120],
-    [-20, -40,  -5,  -5,  -5,  -5, -40, -20],
-    [ 20,  -5,  15,   3,   3,  15,  -5,  20],
-    [  5,  -5,   3,   3,   3,   3,  -5,   5],
-    [  5,  -5,   3,   3,   3,   3,  -5,   5],
-    [ 20,  -5,  15,   3,   3,  15,  -5,  20],
-    [-20, -40,  -5,  -5,  -5,  -5, -40, -20],
-    [120, -20,  20,   5,   5,  20, -20, 120]
+    [120, -20, 20, 5, 5, 20, -20, 120],
+    [-20, -40, -5, -5, -5, -5, -40, -20],
+    [20, -5, 15, 3, 3, 15, -5, 20],
+    [5, -5, 3, 3, 3, 3, -5, 5],
+    [5, -5, 3, 3, 3, 3, -5, 5],
+    [20, -5, 15, 3, 3, 15, -5, 20],
+    [-20, -40, -5, -5, -5, -5, -40, -20],
+    [120, -20, 20, 5, 5, 20, -20, 120]
 ];
 
 // ---------- ゲーム状態 ----------
@@ -85,7 +85,7 @@ function renderBoard() {
             const cell = boardEl.children[r * BOARD_SIZE + c];
             // 既存のディスクをクリア
             const existingDisc = cell.querySelector('.disc');
-            
+
             if (board[r][c] !== EMPTY) {
                 if (!existingDisc) {
                     const disc = document.createElement('div');
@@ -234,8 +234,9 @@ async function onCellClick(r, c) {
     if (!isValidMove(board, r, c, currentPlayer)) return;
 
     await placePiece(r, c, currentPlayer);
-    
-    if (!gameOver && gameMode !== 'human') {
+
+    // CPUモードかつCPUのターンの場合のみCPUを動かす
+    while (!gameOver && gameMode !== 'human' && currentPlayer === WHITE) {
         await cpuTurn();
     }
 }
@@ -243,11 +244,21 @@ async function onCellClick(r, c) {
 async function placePiece(r, c, player) {
     isProcessing = true;
 
+    // 合法手チェック（防御的）
     const flips = getFlippable(board, r, c, player);
+    if (flips.length === 0) {
+        console.warn(`Invalid move at (${r}, ${c}) for player ${player}`);
+        isProcessing = false;
+        return;
+    }
+
     board[r][c] = player;
 
-    // 置いた石のアニメーション
+    // 置いた石のアニメーション（既存disc要素があれば削除）
     const cell = boardEl.children[r * BOARD_SIZE + c];
+    const existingDisc = cell.querySelector('.disc');
+    if (existingDisc) existingDisc.remove();
+
     const disc = document.createElement('div');
     disc.className = `disc ${player === BLACK ? 'black' : 'white'} placed`;
     cell.appendChild(disc);
@@ -265,16 +276,18 @@ async function placePiece(r, c, player) {
         const flipDisc = flipCell.querySelector('.disc');
         if (flipDisc) {
             flipDisc.classList.add('flipping');
+            const capturedPlayer = player; // クロージャで確実にキャプチャ
             setTimeout(() => {
                 flipDisc.classList.remove('flipping');
-                flipDisc.classList.remove(player === BLACK ? 'white' : 'black');
-                flipDisc.classList.add(player === BLACK ? 'black' : 'white');
+                flipDisc.classList.remove(capturedPlayer === BLACK ? 'white' : 'black');
+                flipDisc.classList.add(capturedPlayer === BLACK ? 'black' : 'white');
             }, 300);
         }
         await sleep(80);
     }
 
-    await sleep(300);
+    // 全フリップアニメーション完了を待つ
+    await sleep(350);
 
     updateScore();
 
@@ -287,10 +300,10 @@ async function placePiece(r, c, player) {
         currentPlayer = opponent;
         updateMessage(currentPlayer === BLACK ? '⬛の番だよ！♡' : '⬜の番だよ！♡');
     } else if (myMoves.length > 0) {
-        // パス
+        // パス（currentPlayerは変更しない＝同じプレイヤーがもう一度打つ）
         updateMessage(`${opponent === BLACK ? '⬛' : '⬜'}は置ける場所がないよ💦 パス！`);
         await sleep(1200);
-        updateMessage(currentPlayer === BLACK ? '⬛もう1回！♡' : '⬜もう1回！♡');
+        updateMessage(player === BLACK ? '⬛もう1回！♡' : '⬜もう1回！♡');
     } else {
         // ゲーム終了
         gameOver = true;
@@ -304,7 +317,7 @@ async function placePiece(r, c, player) {
 
 // ---------- CPU AI ----------
 async function cpuTurn() {
-    if (gameOver) return;
+    if (gameOver || currentPlayer !== WHITE) return;
 
     isProcessing = true;
     updateMessage('🤖 CPUが考えてるよ...💭');
@@ -330,11 +343,6 @@ async function cpuTurn() {
     }
 
     await placePiece(move[0], move[1], WHITE);
-
-    // CPUの追加ターン (パスの場合)
-    if (!gameOver && currentPlayer === WHITE && gameMode !== 'human') {
-        await cpuTurn();
-    }
 }
 
 // かんたん: ランダム
